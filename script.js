@@ -2,7 +2,8 @@ import {
   cargarRubys,
   guardarRuby,
   cargarNoticias,
-  guardarNoticia
+  guardarNoticia,
+  borrarRuby
 } from "./firebase.js";
 
 let admin = false;
@@ -15,6 +16,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const noticias = await cargarNoticias();
   mostrarNoticias(noticias);
+
+  // Botón admin (Safari safe)
+  const btnAdmin = document.getElementById("btnAdmin");
+  if (btnAdmin) btnAdmin.addEventListener("click", login);
 });
 
 // ---------- LOGIN ----------
@@ -46,34 +51,22 @@ function mostrarRubys(rubys) {
   const tabla = document.getElementById("tabla");
   if (!tabla) return;
 
+  // limpiar filas viejas
   document.querySelectorAll("#tabla tr:not(:first-child)").forEach(f => f.remove());
 
   rubys.forEach(r => {
     const fila = tabla.insertRow();
-    fila.dataset.id = r.id; // 🔥 guardar ID de Firebase
+    fila.dataset.id = r.id;
 
     crearCelda(fila, r.integrante);
     crearCelda(fila, r.actividad);
     crearCelda(fila, r.rubys, true);
 
     const eliminar = fila.insertCell();
-    eliminar.innerHTML = `<button>🗑️</button>`;
-    eliminar.querySelector("button").addEventListener("click", () => borrarFila(r.id));
-  });
-}
-
-  // borrar filas viejas
-  document.querySelectorAll("#tabla tr:not(:first-child)").forEach(f => f.remove());
-
-  rubys.forEach(r => {
-    const fila = tabla.insertRow();
-
-    crearCelda(fila, r.integrante);
-    crearCelda(fila, r.actividad);
-    crearCelda(fila, r.rubys, true);
-
-    const eliminar = fila.insertCell();
-    eliminar.innerHTML = `<button onclick="borrarFila(this)">🗑️</button>`;
+    const btn = document.createElement("button");
+    btn.textContent = "🗑️";
+    btn.addEventListener("click", () => borrarFila(r.id));
+    eliminar.appendChild(btn);
   });
 }
 
@@ -84,10 +77,13 @@ function crearCelda(fila, texto, esRuby = false) {
   if (esRuby) celda.classList.add("rubys");
 }
 
-function borrarFila(btn) {
+async function borrarFila(id) {
   if (!admin) return alert("🔒 Acción restringida");
-  btn.parentNode.parentNode.remove();
-  // (opcional: borrar en Firebase después)
+
+  await borrarRuby(id);
+
+  const rubys = await cargarRubys();
+  mostrarRubys(rubys);
 }
 
 // ---------- BLOG ----------
@@ -119,16 +115,6 @@ function mostrarNoticias(noticias) {
   });
 }
 
-// Hacer funciones accesibles desde HTML
-window.login = login;
+// Exponer funciones si se usan en HTML
 window.agregarFila = agregarFila;
 window.nuevaNoticia = nuevaNoticia;
-window.borrarFila = borrarFila;
-
-// Conectar botones manualmente (Safari-safe)
-document.addEventListener("DOMContentLoaded", () => {
-  const btnAdmin = document.getElementById("btnAdmin");
-  if (btnAdmin) {
-    btnAdmin.addEventListener("click", login);
-  }
-});
