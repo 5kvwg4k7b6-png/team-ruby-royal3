@@ -1,3 +1,4 @@
+import { cargarRubys, guardarRuby, cargarNoticias, guardarNoticia } from "./firebase.js";
 let admin = false;
 const PASSWORD = "TRRoyal653";
 
@@ -60,7 +61,6 @@ function guardarTabla() {
       celdas[2].innerText
     ]);
   });
-  localStorage.setItem("rubysTabla", JSON.stringify(filas));
 }
 
 function cargarTabla() {
@@ -84,8 +84,6 @@ function nuevaNoticia() {
   const noticias = JSON.parse(localStorage.getItem("noticias")) || [];
   noticias.push({ titulo, contenido });
 
-  localStorage.setItem("noticias", JSON.stringify(noticias));
-  cargarNoticias();
 }
 
 function cargarNoticias() {
