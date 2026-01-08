@@ -1,33 +1,120 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Team Ruby Royale</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+import {
+  cargarRubys,
+  guardarRuby,
+  cargarNoticias,
+  guardarNoticia,
+  borrarRuby
+} from "./firebase.js";
 
-<h1>💎 Team Ruby Royale 💎</h1>
-<p class="lema">Gloria, lealtad y rubys eternos</p>
+let admin = false;
+const PASSWORD = "TRRoyal653";
 
-<button id="btnAdmin">👑 Modo Admin</button>
-<button onclick="agregarFila()">➕ Agregar integrante</button>
+// ---------- INICIO ----------
+document.addEventListener("DOMContentLoaded", async () => {
+  const rubys = await cargarRubys();
+  mostrarRubys(rubys);
 
-<table id="tabla">
-  <tr>
-    <th>Integrante</th>
-    <th>Actividades destacadas</th>
-    <th>Rubys 💎</th>
-    <th>Eliminar</th>
-  </tr>
-</table>
+  const noticias = await cargarNoticias();
+  mostrarNoticias(noticias);
 
-<a class="link" href="blog.html">📰 Ver noticias del reino</a>
+  // Botón admin (Safari safe)
+  const btnAdmin = document.getElementById("btnAdmin");
+  if (btnAdmin) btnAdmin.addEventListener("click", login);
+});
 
-<script type="module" src="script.js"></script>
+// ---------- LOGIN ----------
+function login() {
+  const pass = prompt("👑 Contraseña real:");
+  if (pass === PASSWORD) {
+    admin = true;
+    alert("✨ Modo admin activado");
+  } else {
+    alert("❌ Contraseña incorrecta");
+  }
+}
 
-<!-- Firebase -->
-<script type="module" src="firebase.js"></script>
+// ---------- RUBYS ----------
+async function agregarFila() {
+  if (!admin) return alert("🔒 Solo admin puede editar");
 
-</body>
-</html>
+  await guardarRuby({
+    integrante: "Integrante",
+    actividad: "Actividad",
+    rubys: 0
+  });
+
+  const rubys = await cargarRubys();
+  mostrarRubys(rubys);
+}
+
+function mostrarRubys(rubys) {
+  const tabla = document.getElementById("tabla");
+  if (!tabla) return;
+
+  // limpiar filas viejas
+  document.querySelectorAll("#tabla tr:not(:first-child)").forEach(f => f.remove());
+
+  rubys.forEach(r => {
+    const fila = tabla.insertRow();
+    fila.dataset.id = r.id;
+
+    crearCelda(fila, r.integrante);
+    crearCelda(fila, r.actividad);
+    crearCelda(fila, r.rubys, true);
+
+    const eliminar = fila.insertCell();
+    const btn = document.createElement("button");
+    btn.textContent = "🗑️";
+    btn.addEventListener("click", () => borrarFila(r.id));
+    eliminar.appendChild(btn);
+  });
+}
+
+function crearCelda(fila, texto, esRuby = false) {
+  const celda = fila.insertCell();
+  celda.innerText = texto;
+  celda.contentEditable = admin;
+  if (esRuby) celda.classList.add("rubys");
+}
+
+async function borrarFila(id) {
+  if (!admin) return alert("🔒 Acción restringida");
+
+  await borrarRuby(id);
+
+  const rubys = await cargarRubys();
+  mostrarRubys(rubys);
+}
+
+// ---------- BLOG ----------
+async function nuevaNoticia() {
+  if (!admin) return alert("🔒 Solo admin puede publicar");
+
+  const titulo = prompt("Título de la noticia:");
+  const contenido = prompt("Contenido:");
+
+  if (!titulo || !contenido) return;
+
+  await guardarNoticia({ titulo, contenido });
+
+  const noticias = await cargarNoticias();
+  mostrarNoticias(noticias);
+}
+
+function mostrarNoticias(noticias) {
+  const contenedor = document.getElementById("posts");
+  if (!contenedor) return;
+
+  contenedor.innerHTML = "";
+
+  noticias.forEach(n => {
+    const div = document.createElement("div");
+    div.className = "post";
+    div.innerHTML = `<h3>${n.titulo}</h3><p>${n.contenido}</p>`;
+    contenedor.appendChild(div);
+  });
+}
+
+// Exponer funciones si se usan en HTML
+window.agregarFila = agregarFila;
+window.nuevaNoticia = nuevaNoticia;
