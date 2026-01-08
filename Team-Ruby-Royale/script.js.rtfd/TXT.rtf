@@ -1,0 +1,68 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling1\cocoaplatform1{\fonttbl\f0\fnil\fcharset0 .SFUI-Bold;\f1\fnil\fcharset0 .SFUI-Regular;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\deftab560
+\pard\pardeftab560\slleading20\sa60\partightenfactor0
+
+\f0\b\fs56 \AppleTypeServices\AppleTypeServicesF2293774 \cf0 script.js\
+\pard\pardeftab560\slleading80\partightenfactor0
+
+\f1\b0\fs34 \AppleTypeServices\AppleTypeServicesF2293774 \cf0 let admin = false;\
+const PASSWORD = "TRRoyal653";\
+\
+// Login admin\
+function login() \{\
+  const pass = prompt("\uc0\u55357 \u56401  Contrase\'f1a real:");\
+  if (pass === PASSWORD) \{\
+    admin = true;\
+    alert("\uc0\u10024  Bienvenida, Alteza");\
+  \} else \{\
+    alert("\uc0\u10060  Acceso denegado");\
+  \}\
+\}\
+\
+// Agregar fila al contador\
+function agregarFila() \{\
+  if (!admin) return alert("\uc0\u55357 \u56594  Solo la realeza puede editar");\
+\
+  const tabla = document.getElementById("tabla");\
+  const fila = tabla.insertRow();\
+\
+  const c1 = fila.insertCell();\
+  const c2 = fila.insertCell();\
+  const c3 = fila.insertCell();\
+  const c4 = fila.insertCell();\
+\
+  c1.contentEditable = true;\
+  c2.contentEditable = true;\
+  c3.contentEditable = true;\
+\
+  c1.innerText = "Integrante";\
+  c2.innerText = "Actividad destacada";\
+  c3.innerText = "0";\
+  c3.classList.add("rubys");\
+\
+  c4.innerHTML = `<button onclick="borrarFila(this)">\uc0\u55357 \u56785 \u65039 </button>`;\
+\}\
+\
+// Borrar fila\
+function borrarFila(btn) \{\
+  if (!admin) return alert("\uc0\u55357 \u56594  Acci\'f3n restringida");\
+  const fila = btn.parentNode.parentNode;\
+  fila.remove();\
+\}\
+\
+// Nueva noticia\
+function nuevaNoticia() \{\
+  if (!admin) return alert("\uc0\u55357 \u56594  Solo admin puede publicar");\
+\
+  const titulo = prompt("T\'edtulo de la noticia:");\
+  const contenido = prompt("Contenido:");\
+\
+  const post = document.createElement("div");\
+  post.className = "post";\
+  post.innerHTML = `<h3>$\{titulo\}</h3><p>$\{contenido\}</p>`;\
+\
+  document.getElementById("posts").appendChild(post);\
+\}}
