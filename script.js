@@ -108,3 +108,11 @@ window.login = login;
 window.agregarFila = agregarFila;
 window.nuevaNoticia = nuevaNoticia;
 window.borrarFila = borrarFila;
+
+// Conectar botones manualmente (Safari-safe)
+document.addEventListener("DOMContentLoaded", () => {
+  const btnAdmin = document.getElementById("btnAdmin");
+  if (btnAdmin) {
+    btnAdmin.addEventListener("click", login);
+  }
+});
