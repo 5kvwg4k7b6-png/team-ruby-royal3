@@ -46,6 +46,22 @@ function mostrarRubys(rubys) {
   const tabla = document.getElementById("tabla");
   if (!tabla) return;
 
+  document.querySelectorAll("#tabla tr:not(:first-child)").forEach(f => f.remove());
+
+  rubys.forEach(r => {
+    const fila = tabla.insertRow();
+    fila.dataset.id = r.id; // 🔥 guardar ID de Firebase
+
+    crearCelda(fila, r.integrante);
+    crearCelda(fila, r.actividad);
+    crearCelda(fila, r.rubys, true);
+
+    const eliminar = fila.insertCell();
+    eliminar.innerHTML = `<button>🗑️</button>`;
+    eliminar.querySelector("button").addEventListener("click", () => borrarFila(r.id));
+  });
+}
+
   // borrar filas viejas
   document.querySelectorAll("#tabla tr:not(:first-child)").forEach(f => f.remove());
 
