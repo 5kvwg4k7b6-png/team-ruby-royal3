@@ -102,3 +102,9 @@ function mostrarNoticias(noticias) {
     contenedor.appendChild(div);
   });
 }
+
+// Hacer funciones accesibles desde HTML
+window.login = login;
+window.agregarFila = agregarFila;
+window.nuevaNoticia = nuevaNoticia;
+window.borrarFila = borrarFila;
