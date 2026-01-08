@@ -1,11 +1,20 @@
-import { cargarRubys, guardarRuby, cargarNoticias, guardarNoticia } from "./firebase.js";
+import {
+  cargarRubys,
+  guardarRuby,
+  cargarNoticias,
+  guardarNoticia
+} from "./firebase.js";
+
 let admin = false;
 const PASSWORD = "TRRoyal653";
 
-// ---------- CARGAR DATOS ----------
-document.addEventListener("DOMContentLoaded", () => {
-  cargarTabla();
-  cargarNoticias();
+// ---------- INICIO ----------
+document.addEventListener("DOMContentLoaded", async () => {
+  const rubys = await cargarRubys();
+  mostrarRubys(rubys);
+
+  const noticias = await cargarNoticias();
+  mostrarNoticias(noticias);
 });
 
 // ---------- LOGIN ----------
@@ -19,79 +28,72 @@ function login() {
   }
 }
 
-// ---------- TABLA RUBYS ----------
-function agregarFila() {
+// ---------- RUBYS ----------
+async function agregarFila() {
   if (!admin) return alert("🔒 Solo admin puede editar");
 
-  const tabla = document.getElementById("tabla");
-  const fila = tabla.insertRow();
-
-  crearCeldas(fila);
-  guardarTabla();
-}
-
-function crearCeldas(fila, datos = ["Integrante", "Actividad", "0"]) {
-  datos.forEach((texto, i) => {
-    const celda = fila.insertCell();
-    celda.contentEditable = admin;
-    celda.innerText = texto;
-    if (i === 2) celda.classList.add("rubys");
-
-    celda.addEventListener("input", guardarTabla);
+  await guardarRuby({
+    integrante: "Integrante",
+    actividad: "Actividad",
+    rubys: 0
   });
 
-  const eliminar = fila.insertCell();
-  eliminar.innerHTML = `<button onclick="borrarFila(this)">🗑️</button>`;
+  const rubys = await cargarRubys();
+  mostrarRubys(rubys);
+}
+
+function mostrarRubys(rubys) {
+  const tabla = document.getElementById("tabla");
+  if (!tabla) return;
+
+  // borrar filas viejas
+  document.querySelectorAll("#tabla tr:not(:first-child)").forEach(f => f.remove());
+
+  rubys.forEach(r => {
+    const fila = tabla.insertRow();
+
+    crearCelda(fila, r.integrante);
+    crearCelda(fila, r.actividad);
+    crearCelda(fila, r.rubys, true);
+
+    const eliminar = fila.insertCell();
+    eliminar.innerHTML = `<button onclick="borrarFila(this)">🗑️</button>`;
+  });
+}
+
+function crearCelda(fila, texto, esRuby = false) {
+  const celda = fila.insertCell();
+  celda.innerText = texto;
+  celda.contentEditable = admin;
+  if (esRuby) celda.classList.add("rubys");
 }
 
 function borrarFila(btn) {
   if (!admin) return alert("🔒 Acción restringida");
   btn.parentNode.parentNode.remove();
-  guardarTabla();
-}
-
-function guardarTabla() {
-  const filas = [];
-  document.querySelectorAll("#tabla tr").forEach((fila, i) => {
-    if (i === 0) return;
-    const celdas = fila.querySelectorAll("td");
-    filas.push([
-      celdas[0].innerText,
-      celdas[1].innerText,
-      celdas[2].innerText
-    ]);
-  });
-}
-
-function cargarTabla() {
-  const datos = JSON.parse(localStorage.getItem("rubysTabla"));
-  if (!datos) return;
-
-  const tabla = document.getElementById("tabla");
-  datos.forEach(filaDatos => {
-    const fila = tabla.insertRow();
-    crearCeldas(fila, filaDatos);
-  });
+  // (opcional: borrar en Firebase después)
 }
 
 // ---------- BLOG ----------
-function nuevaNoticia() {
+async function nuevaNoticia() {
   if (!admin) return alert("🔒 Solo admin puede publicar");
 
   const titulo = prompt("Título de la noticia:");
   const contenido = prompt("Contenido:");
 
-  const noticias = JSON.parse(localStorage.getItem("noticias")) || [];
-  noticias.push({ titulo, contenido });
+  if (!titulo || !contenido) return;
 
+  await guardarNoticia({ titulo, contenido });
+
+  const noticias = await cargarNoticias();
+  mostrarNoticias(noticias);
 }
 
-function cargarNoticias() {
+function mostrarNoticias(noticias) {
   const contenedor = document.getElementById("posts");
   if (!contenedor) return;
 
   contenedor.innerHTML = "";
-  const noticias = JSON.parse(localStorage.getItem("noticias")) || [];
 
   noticias.forEach(n => {
     const div = document.createElement("div");
