@@ -30,6 +30,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function agregarFila() {
   if (!admin) return alert("🔒 Solo admin");
 
+  const nuevo = {
+    integrante: "Integrante",
+    actividad: "Actividad",
+    rubys: 0
+  };
+
+  // Guardar en Firebase
+  await guardarRuby(nuevo);
+
+  // Volver a cargar y mostrar
+  const rubys = await cargarRubys();
+  mostrarRubys(rubys);
+}{
+  if (!admin) return alert("🔒 Solo admin");
+
   await guardarRuby({
     integrante: "Integrante",
     actividad: "Actividad",
