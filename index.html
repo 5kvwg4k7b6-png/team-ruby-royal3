@@ -1,120 +1,92 @@
-import {
-  cargarRubys,
-  guardarRuby,
-  cargarNoticias,
-  guardarNoticia,
-  borrarRuby
-} from "./firebase.js";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Ruby Royale</title>
 
-let admin = false;
-const PASSWORD = "TRRoyal653";
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #1a0000;
+      color: gold;
+      margin: 0;
+      padding: 20px;
+    }
 
-// ---------- INICIO ----------
-document.addEventListener("DOMContentLoaded", async () => {
-  const rubys = await cargarRubys();
-  mostrarRubys(rubys);
+    h1 {
+      text-align: center;
+      color: gold;
+    }
 
-  const noticias = await cargarNoticias();
-  mostrarNoticias(noticias);
+    button {
+      background: crimson;
+      color: gold;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px 0;
+      cursor: pointer;
+      border-radius: 5px;
+      font-weight: bold;
+    }
 
-  // Botón admin (Safari safe)
-  const btnAdmin = document.getElementById("btnAdmin");
-  if (btnAdmin) btnAdmin.addEventListener("click", login);
-});
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background: #300;
+    }
 
-// ---------- LOGIN ----------
-function login() {
-  const pass = prompt("👑 Contraseña real:");
-  if (pass === PASSWORD) {
-    admin = true;
-    alert("✨ Modo admin activado");
-  } else {
-    alert("❌ Contraseña incorrecta");
-  }
-}
+    th, td {
+      border: 1px solid gold;
+      padding: 8px;
+      text-align: center;
+    }
 
-// ---------- RUBYS ----------
-async function agregarFila() {
-  if (!admin) return alert("🔒 Solo admin puede editar");
+    th {
+      background: #500;
+    }
 
-  await guardarRuby({
-    integrante: "Integrante",
-    actividad: "Actividad",
-    rubys: 0
-  });
+    .rubys {
+      font-weight: bold;
+      color: #ffdddd;
+    }
 
-  const rubys = await cargarRubys();
-  mostrarRubys(rubys);
-}
+    .post {
+      background: #300;
+      border: 1px solid gold;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
 
-function mostrarRubys(rubys) {
-  const tabla = document.getElementById("tabla");
-  if (!tabla) return;
+<body>
 
-  // limpiar filas viejas
-  document.querySelectorAll("#tabla tr:not(:first-child)").forEach(f => f.remove());
+  <h1>👑 Team Ruby Royale 👑</h1>
 
-  rubys.forEach(r => {
-    const fila = tabla.insertRow();
-    fila.dataset.id = r.id;
+  <!-- BOTONES -->
+  <button id="btnAdmin">👑 Modo Admin</button>
+  <button onclick="agregarFila()">➕ Añadir integrante</button>
+  <button onclick="nuevaNoticia()">📰 Nueva noticia</button>
 
-    crearCelda(fila, r.integrante);
-    crearCelda(fila, r.actividad);
-    crearCelda(fila, r.rubys, true);
+  <!-- TABLA RUBYS -->
+  <h2>💎 Contador de Rubys</h2>
+  <table id="tabla">
+    <tr>
+      <th>Integrante</th>
+      <th>Actividad</th>
+      <th>Rubys</th>
+      <th>Acción</th>
+    </tr>
+  </table>
 
-    const eliminar = fila.insertCell();
-    const btn = document.createElement("button");
-    btn.textContent = "🗑️";
-    btn.addEventListener("click", () => borrarFila(r.id));
-    eliminar.appendChild(btn);
-  });
-}
+  <!-- BLOG -->
+  <h2>📜 Noticias del Team</h2>
+  <div id="posts"></div>
 
-function crearCelda(fila, texto, esRuby = false) {
-  const celda = fila.insertCell();
-  celda.innerText = texto;
-  celda.contentEditable = admin;
-  if (esRuby) celda.classList.add("rubys");
-}
-
-async function borrarFila(id) {
-  if (!admin) return alert("🔒 Acción restringida");
-
-  await borrarRuby(id);
-
-  const rubys = await cargarRubys();
-  mostrarRubys(rubys);
-}
-
-// ---------- BLOG ----------
-async function nuevaNoticia() {
-  if (!admin) return alert("🔒 Solo admin puede publicar");
-
-  const titulo = prompt("Título de la noticia:");
-  const contenido = prompt("Contenido:");
-
-  if (!titulo || !contenido) return;
-
-  await guardarNoticia({ titulo, contenido });
-
-  const noticias = await cargarNoticias();
-  mostrarNoticias(noticias);
-}
-
-function mostrarNoticias(noticias) {
-  const contenedor = document.getElementById("posts");
-  if (!contenedor) return;
-
-  contenedor.innerHTML = "";
-
-  noticias.forEach(n => {
-    const div = document.createElement("div");
-    div.className = "post";
-    div.innerHTML = `<h3>${n.titulo}</h3><p>${n.contenido}</p>`;
-    contenedor.appendChild(div);
-  });
-}
-
-// Exponer funciones si se usan en HTML
-window.agregarFila = agregarFila;
-window.nuevaNoticia = nuevaNoticia;
+  <!-- SCRIPT -->
+  <script type="module" src="./script.js"></script>
+</body>
+</html>
