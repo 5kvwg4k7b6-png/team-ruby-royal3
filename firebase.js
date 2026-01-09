@@ -1,33 +1,42 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDUgt5cpebZV2VUnWgxwg8c77S5_vDdux8",
-  authDomain: "team-ruby-royale.firebaseapp.com",
-  projectId: "team-ruby-royale",
-  storageBucket: "team-ruby-royale.firebasestorage.app",
-  messagingSenderId: "669107261224",
-  appId: "1:669107261224:web:d9a0804788919d6f378a1d"
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_DOMINIO",
+  projectId: "TU_PROJECT_ID",
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 🔥 RUBYS
+// ---------- RUBYS ----------
+export async function cargarRubys() {
+  const snap = await getDocs(collection(db, "rubys"));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
 export async function guardarRuby(data) {
   await addDoc(collection(db, "rubys"), data);
 }
 
-export async function cargarRubys() {
-  const querySnapshot = await getDocs(collection(db, "rubys"));
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+export async function borrarRuby(id) {
+  await deleteDoc(doc(db, "rubys", id));
 }
 
-// 📰 NOTICIAS
+// ---------- NOTICIAS ----------
+export async function cargarNoticias() {
+  const snap = await getDocs(collection(db, "noticias"));
+  return snap.docs.map(d => d.data());
+}
+
 export async function guardarNoticia(data) {
   await addDoc(collection(db, "noticias"), data);
-}
-
-export async function cargarNoticias() {
-  const querySnapshot = await getDocs(collection(db, "noticias"));
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
