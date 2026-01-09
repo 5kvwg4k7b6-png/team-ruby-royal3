@@ -1,26 +1,13 @@
 import {
   cargarRubys,
   guardarRuby,
+  borrarRuby,
   cargarNoticias,
-  guardarNoticia,
-  borrarRuby
+  guardarNoticia
 } from "./firebase.js";
 
 let admin = false;
 const PASSWORD = "TRRoyal653";
-
-// ---------- INICIO ----------
-document.addEventListener("DOMContentLoaded", async () => {
-  const rubys = await cargarRubys();
-  mostrarRubys(rubys);
-
-  const noticias = await cargarNoticias();
-  mostrarNoticias(noticias);
-
-  // Botón admin (Safari safe)
-  const btnAdmin = document.getElementById("btnAdmin");
-  if (btnAdmin) btnAdmin.addEventListener("click", login);
-});
 
 // ---------- LOGIN ----------
 function login() {
@@ -33,9 +20,15 @@ function login() {
   }
 }
 
+// ---------- INICIO ----------
+document.addEventListener("DOMContentLoaded", async () => {
+  mostrarRubys(await cargarRubys());
+  mostrarNoticias(await cargarNoticias());
+});
+
 // ---------- RUBYS ----------
 async function agregarFila() {
-  if (!admin) return alert("🔒 Solo admin puede editar");
+  if (!admin) return alert("🔒 Solo admin");
 
   await guardarRuby({
     integrante: "Integrante",
@@ -43,78 +36,64 @@ async function agregarFila() {
     rubys: 0
   });
 
-  const rubys = await cargarRubys();
-  mostrarRubys(rubys);
+  mostrarRubys(await cargarRubys());
 }
 
 function mostrarRubys(rubys) {
   const tabla = document.getElementById("tabla");
-  if (!tabla) return;
-
-  // limpiar filas viejas
   document.querySelectorAll("#tabla tr:not(:first-child)").forEach(f => f.remove());
 
   rubys.forEach(r => {
     const fila = tabla.insertRow();
-    fila.dataset.id = r.id;
 
     crearCelda(fila, r.integrante);
     crearCelda(fila, r.actividad);
     crearCelda(fila, r.rubys, true);
 
-    const eliminar = fila.insertCell();
-    const btn = document.createElement("button");
-    btn.textContent = "🗑️";
-    btn.addEventListener("click", () => borrarFila(r.id));
-    eliminar.appendChild(btn);
+    const del = fila.insertCell();
+    del.innerHTML = `<button onclick="eliminarRuby('${r.id}')">🗑️</button>`;
   });
 }
 
-function crearCelda(fila, texto, esRuby = false) {
+function crearCelda(fila, texto, ruby = false) {
   const celda = fila.insertCell();
   celda.innerText = texto;
   celda.contentEditable = admin;
-  if (esRuby) celda.classList.add("rubys");
+  if (ruby) celda.classList.add("rubys");
 }
 
-async function borrarFila(id) {
-  if (!admin) return alert("🔒 Acción restringida");
-
+async function eliminarRuby(id) {
+  if (!admin) return alert("🔒 Solo admin");
   await borrarRuby(id);
-
-  const rubys = await cargarRubys();
-  mostrarRubys(rubys);
+  mostrarRubys(await cargarRubys());
 }
 
 // ---------- BLOG ----------
 async function nuevaNoticia() {
-  if (!admin) return alert("🔒 Solo admin puede publicar");
+  if (!admin) return alert("🔒 Solo admin");
 
-  const titulo = prompt("Título de la noticia:");
+  const titulo = prompt("Título:");
   const contenido = prompt("Contenido:");
-
   if (!titulo || !contenido) return;
 
   await guardarNoticia({ titulo, contenido });
-
-  const noticias = await cargarNoticias();
-  mostrarNoticias(noticias);
+  mostrarNoticias(await cargarNoticias());
 }
 
 function mostrarNoticias(noticias) {
-  const contenedor = document.getElementById("posts");
-  if (!contenedor) return;
-
-  contenedor.innerHTML = "";
+  const cont = document.getElementById("posts");
+  cont.innerHTML = "";
 
   noticias.forEach(n => {
     const div = document.createElement("div");
     div.className = "post";
     div.innerHTML = `<h3>${n.titulo}</h3><p>${n.contenido}</p>`;
-    contenedor.appendChild(div);
+    cont.appendChild(div);
   });
 }
 
-// Exponer funciones si se usan en HTML
+// Hacer accesible desde HTML
+window.login = login;
 window.agregarFila = agregarFila;
 window.nuevaNoticia = nuevaNoticia;
+window.eliminarRuby = eliminarRuby;
